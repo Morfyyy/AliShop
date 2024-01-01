@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchCardInfo } from '../../redux/cardInfo/slice';
 import { fetchAddItems, fetchPayProduct } from '../../redux/cart/slice';
 import { RootState } from '../../redux/store';
+import { message } from 'antd';
 
 type obj = {
   id: number;
@@ -25,7 +26,35 @@ const CardInfo = () => {
   const { items } = useSelector((state: RootState) => state.cardInfo);
   const dispatch = useDispatch();
   const router = useRouter();
+  const [messageApi, contextHolder] = message.useMessage();
 
+  const paySuccess = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Товар успешно оформлен!',
+    });
+  };
+
+  const payError = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Не удалось оформить товар:(',
+    });
+  };
+
+  const addToCartSuccess = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Товар успешно добавлен!',
+    });
+  };
+
+  const addToCartError = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Не удалось добавить товар:(',
+    });
+  };
   React.useEffect(() => {
     const id = router.query.id;
     //@ts-ignore
@@ -35,11 +64,11 @@ const CardInfo = () => {
     try {
       //@ts-ignore
       dispatch(fetchAddItems({ obj }));
-      alert('Товар успешно добавлен в корзину:)');
+      addToCartSuccess();
       router.push('/');
     } catch (error) {
       console.log(error);
-      alert('Не удалось добавить товар в корзину:(');
+      addToCartError();
     }
   };
 
@@ -47,15 +76,16 @@ const CardInfo = () => {
     try {
       //@ts-ignore
       dispatch(fetchPayProduct(items));
-      alert('Товары успешно оформел и добавлен в профиль:)');
+      paySuccess();
       router.push('/');
     } catch (error) {
-      alert('Не удалось добавить товары в профиль');
+      payError();
     }
   };
 
   return (
     <div className={styles.cardInfo}>
+      {contextHolder}
       {items.map((item: obj) => {
         return (
           <>

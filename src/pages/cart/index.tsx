@@ -12,6 +12,7 @@ import {
   setItems,
 } from '../../redux/cart/slice';
 import { RootState } from '../../redux/store';
+import { message } from 'antd';
 
 type obj = {
   id: number;
@@ -28,9 +29,50 @@ type obj = {
 };
 
 const Cart = () => {
-  const { items, totalPrice } = useSelector((state) => state.cart);
+  const { items, totalPrice } = useSelector((state: RootState) => state.cart);
   const dispatch = useDispatch();
 
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const paySuccess = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Товар успешно оформлен!',
+    });
+  };
+
+  const payError = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Не удалось оформить товар:(',
+    });
+  };
+  const removeSuccess = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Товар успешно удален!',
+    });
+  };
+
+  const removeError = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Не удалось удалить товар:(',
+    });
+  };
+  const clearSuccess = () => {
+    messageApi.open({
+      type: 'success',
+      content: 'Корзина успешно очищена!',
+    });
+  };
+
+  const clearError = () => {
+    messageApi.open({
+      type: 'error',
+      content: 'Не удалось очистить корзину:(',
+    });
+  };
   React.useEffect(() => {
     dispatch(fetchCartItems());
   }, []);
@@ -38,34 +80,37 @@ const Cart = () => {
   const clearAll = async () => {
     try {
       dispatch(fetchClearItems(items));
-      alert('Корзина очищена!');
+      clearSuccess();
     } catch (error) {
       console.log(error);
-      alert('Не удалось очистить корзину');
+      clearError();
     }
   };
 
   const removeProduct = async (id: number) => {
     try {
       dispatch(fetchRemoveItems({ id }));
-      dispatch(setItems(items.filter((obj: { id: number }) => obj.id !== id)));
+      dispatch(setItems(items.filter((obj: any) => obj.id !== id)));
+      removeSuccess();
     } catch (error) {
-      alert('Не удалось удалить товар:(');
       console.log(error);
+      removeError();
     }
   };
 
   const payProduct = async (items: obj[]) => {
     try {
       dispatch(fetchPayProduct({ items }));
-      alert('Товары успешно добавлены в профиль:)');
+      paySuccess();
     } catch (error) {
-      alert('Не удалось добавить товары в профиль');
+      console.log(error);
+      payError();
     }
   };
 
   return (
     <div className={styles.cart}>
+      {contextHolder}
       {items.length === 0 ? (
         <CartEmpty />
       ) : (
